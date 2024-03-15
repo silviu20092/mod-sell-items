@@ -28,6 +28,9 @@ public:
 private:
     static void SellItem(ChatHandler* handler, Item* item, const ItemTemplate* itemTemplate, uint32& totalSellPrice, uint32& totalCount)
     {
+        if (!sConfigMgr->GetOption<int32>("SellItems.SellTradeGoods", 0) && itemTemplate->Class == ITEM_CLASS_TRADE_GOODS)
+            return;
+
         if (itemTemplate->SellPrice <= 0)
             return;
 

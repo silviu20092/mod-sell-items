@@ -53,6 +53,15 @@ SellItems.SearchBackpack = 1
 SellItems.SearchBags = 1
 
 #
+#    SellItems.SellTradeGoods
+#        Description: Whether to include Trade Goods as sellable (crafting stuff like leather, cloth etc)
+#        Values:      0 - Disabled
+#                     1 - Enabled
+#
+
+SellItems.SellTradeGoods = 0
+
+#
 #    SellItems.ItemQualityColorIdentifier.XXXX
 #        Description: Identify item quality (poor, normal, rare, epic etc) using specific words.
 #        Example: .sell grey = will sell "Poor" quality items, aka. grey items

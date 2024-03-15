@@ -1,0 +1,22 @@
+/*
+ * Credits: silviu20092
+ */
+
+#ifndef _MOD_UTILS_H_
+#define _MOD_UTILS_H_
+
+#include <string>
+
+class ChatHandler;
+class Item;
+class ItemTemplate;
+
+class SI_Utils
+{
+public:
+    static std::string ToLower(const std::string& text);
+    static int ColorToQuality(const std::string& color);
+    static std::string ItemLink(ChatHandler* handler, const Item* item, const ItemTemplate* itemTemplate);
+};
+
+#endif

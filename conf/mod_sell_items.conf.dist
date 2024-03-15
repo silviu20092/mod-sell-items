@@ -1,0 +1,68 @@
+#
+# Credits: silviu20092
+#
+
+[worldserver]
+
+########################################
+# Sell Items module configuration
+########################################
+#
+#    SellItems.SearchBank
+#        Description: Search through player bank and sell matching items - bank bag slots are included also
+#        Values:      0 - Disabled
+#                     1 - Enabled
+#
+
+SellItems.SearchBank = 0
+
+#
+#    SellItems.SearchKeyring
+#        Description: Search through player keyring and sell matching items
+#        Values:      0 - Disabled
+#                     1 - Enabled
+#
+
+SellItems.SearchKeyring = 1
+
+#
+#    SellItems.SearchEquipped
+#        Description: Search through player's equipped items and sell matching items
+#        Values:      0 - Disabled
+#                     1 - Enabled
+#
+
+SellItems.SearchEquipped = 0
+
+#
+#    SellItems.SearchBackpack
+#        Description: Search through player's main bag (16-slot backpack)
+#        Values:      0 - Disabled
+#                     1 - Enabled
+#
+
+SellItems.SearchBackpack = 1
+
+#
+#    SellItems.SearchBags
+#        Description: Search through player's bags (the 4 bags without backpack)
+#        Values:      0 - Disabled
+#                     1 - Enabled
+#
+
+SellItems.SearchBags = 1
+
+#
+#    SellItems.ItemQualityColorIdentifier.XXXX
+#        Description: Identify item quality (poor, normal, rare, epic etc) using specific words.
+#        Example: .sell grey = will sell "Poor" quality items, aka. grey items
+#                 .sell green = will sell "Uncommon" quality items, aka. green items
+#        This setting just provides localisation for non-english speakers.
+#
+
+SellItems.ItemQualityColorIdentifier.Poor=grey
+SellItems.ItemQualityColorIdentifier.Normal=white
+SellItems.ItemQualityColorIdentifier.Uncommon=green
+SellItems.ItemQualityColorIdentifier.Rare=blue
+SellItems.ItemQualityColorIdentifier.Epic=purple
+SellItems.ItemQualityColorIdentifier.Legendary=orange

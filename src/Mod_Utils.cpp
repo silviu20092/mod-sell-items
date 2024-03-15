@@ -15,7 +15,7 @@ std::string SI_Utils::ToLower(const std::string& text)
     return result;
 }
 
-int SI_Utils::ColorToQuality(const std::string& color)
+uint32 SI_Utils::ColorToQuality(const std::string& color)
 {
     if (color == sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Poor", "grey"))
         return ITEM_QUALITY_POOR;

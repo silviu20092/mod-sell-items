@@ -101,7 +101,7 @@ private:
 
         color = SI_Utils::ToLower(color);
 
-        int quality = SI_Utils::ColorToQuality(color);
+        uint32 quality = SI_Utils::ColorToQuality(color);
         if (quality == MAX_ITEM_QUALITY)
         {
             handler->PSendSysMessage("Invalid item quality received.");

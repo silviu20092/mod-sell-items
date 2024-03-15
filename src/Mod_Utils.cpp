@@ -33,7 +33,7 @@ uint32 SI_Utils::ColorToQuality(const std::string& color)
     return MAX_ITEM_QUALITY;
 }
 
-std::string SI_Utils::ItemLink(ChatHandler* handler, const Item* item, const ItemTemplate* itemTemplate)
+std::string SI_Utils::ItemLink(ChatHandler* handler, const ItemTemplate* itemTemplate)
 {
     LocaleConstant loc_idx = handler->GetSession()->GetSessionDbLocaleIndex();
     std::string name = itemTemplate->Name1;

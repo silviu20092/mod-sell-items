@@ -16,7 +16,7 @@ class SI_Utils
 public:
     static std::string ToLower(const std::string& text);
     static uint32 ColorToQuality(const std::string& color);
-    static std::string ItemLink(ChatHandler* handler, const Item* item, const ItemTemplate* itemTemplate);
+    static std::string ItemLink(ChatHandler* handler, const ItemTemplate* itemTemplate);
 };
 
 #endif

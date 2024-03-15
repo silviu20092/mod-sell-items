@@ -91,7 +91,7 @@ private:
         player->ModifyMoney(money);
         totalSellPrice += money;
 
-        handler->PSendSysMessage("Sold %dx %s for %d copper.", count, SI_Utils::ItemLink(handler, item, itemTemplate).c_str(), money);
+        handler->PSendSysMessage("Sold %dx %s for %d copper.", count, SI_Utils::ItemLink(handler, itemTemplate).c_str(), money);
     }
 
     static bool HandleSellItems(ChatHandler* handler, std::string color)

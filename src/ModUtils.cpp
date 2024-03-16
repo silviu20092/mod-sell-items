@@ -6,16 +6,16 @@
 #include "ObjectMgr.h"
 #include "Config.h"
 #include "Player.h"
-#include "Mod_Utils.h"
+#include "ModUtils.h"
 
-std::string SI_Utils::ToLower(const std::string& text)
+std::string ModUtils::ToLower(const std::string& text)
 {
     std::string result = text;
     std::transform(result.begin(), result.end(), result.begin(), tolower);
     return result;
 }
 
-uint32 SI_Utils::ColorToQuality(const std::string& color)
+uint32 ModUtils::ColorToQuality(const std::string& color)
 {
     if (color == sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Poor", "grey"))
         return ITEM_QUALITY_POOR;
@@ -33,7 +33,7 @@ uint32 SI_Utils::ColorToQuality(const std::string& color)
     return MAX_ITEM_QUALITY;
 }
 
-std::string SI_Utils::ItemLink(ChatHandler* handler, const ItemTemplate* itemTemplate)
+std::string ModUtils::ItemLink(ChatHandler* handler, const ItemTemplate* itemTemplate)
 {
     LocaleConstant loc_idx = handler->GetSession()->GetSessionDbLocaleIndex();
     std::string name = itemTemplate->Name1;

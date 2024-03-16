@@ -11,7 +11,7 @@ class ChatHandler;
 class Item;
 class ItemTemplate;
 
-class SI_Utils
+class ModUtils
 {
 public:
     static std::string ToLower(const std::string& text);

@@ -3,7 +3,7 @@
  */
 
 #include "ScriptMgr.h"
-#include "Mod_Utils.h"
+#include "ModUtils.h"
 #include "Player.h"
 #include "Config.h"
 #include "Chat.h"
@@ -35,7 +35,6 @@ private:
             return;
 
         Player* player = handler->GetPlayer();
-        ObjectGuid itemGuid = item->GetGUID();
 
         if (item->GetOwnerGUID() != player->GetGUID())
             return;
@@ -43,14 +42,13 @@ private:
         if (item->IsNotEmptyBag())
             return;
 
-        if (player->GetLootGUID() == itemGuid)
+        if (player->GetLootGUID() == item->GetGUID())
             return;
 
         if (item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_REFUNDABLE))
             return;
 
         uint32 count = item->GetCount();
-        totalCount += count;
         uint32 money = itemTemplate->SellPrice * count;
         if (player->GetMoney() >= MAX_MONEY_AMOUNT - money)
             return;
@@ -92,9 +90,11 @@ private:
         player->UpdateTitansGrip();
 
         player->ModifyMoney(money);
-        totalSellPrice += money;
 
-        handler->PSendSysMessage("Sold %dx %s for %d copper.", count, SI_Utils::ItemLink(handler, itemTemplate).c_str(), money);
+        totalSellPrice += money;
+        totalCount += count;
+
+        handler->PSendSysMessage("Sold %dx %s for %d copper.", count, ModUtils::ItemLink(handler, itemTemplate).c_str(), money);
     }
 
     static bool HandleSellItems(ChatHandler* handler, std::string color)
@@ -102,13 +102,14 @@ private:
         if (color.empty())
             return false;
 
-        color = SI_Utils::ToLower(color);
+        color = ModUtils::ToLower(color);
 
-        uint32 quality = SI_Utils::ColorToQuality(color);
+        uint32 quality = ModUtils::ColorToQuality(color);
         if (quality == MAX_ITEM_QUALITY)
         {
             handler->PSendSysMessage("Invalid item quality received.");
-            return true;
+            handler->SetSentErrorMessage(true);
+            return false;
         }
 
         const Player* player = handler->GetPlayer();

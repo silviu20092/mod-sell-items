@@ -28,16 +28,17 @@ private:
 
     std::map<uint32, std::string> itemQualityColorIdentifier;
 
+    std::string ItemLink(ChatHandler* handler, const ItemTemplate* itemTemplate);
     void SellItem(Player* player, Item* item, const ItemTemplate* itemTemplate, uint32& totalSellPrice, uint32& totalCount);
 public:
     static ModUtils* instance();
 
     std::string ToLower(const std::string& text);
     uint32 ColorToQuality(const std::string& color);
-    std::string ItemLink(ChatHandler* handler, const ItemTemplate* itemTemplate);
 
     bool SellItemsOfQuality(Player* player, uint32 quality);
 
+    void BuildItemQualityColorIdentifier();
     const std::map<uint32, std::string>& GetItemQualityColorIdentifier() const
     {
         return itemQualityColorIdentifier;

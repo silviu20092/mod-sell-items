@@ -10,12 +10,7 @@
 
 ModUtils::ModUtils()
 {
-    itemQualityColorIdentifier[ITEM_QUALITY_POOR] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Poor", "grey");
-    itemQualityColorIdentifier[ITEM_QUALITY_NORMAL] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Normal", "white");
-    itemQualityColorIdentifier[ITEM_QUALITY_UNCOMMON] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Uncommon", "green");
-    itemQualityColorIdentifier[ITEM_QUALITY_RARE] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Rare", "blue");
-    itemQualityColorIdentifier[ITEM_QUALITY_EPIC] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Epic", "epic");
-    itemQualityColorIdentifier[ITEM_QUALITY_LEGENDARY] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Legendary", "orange");
+    BuildItemQualityColorIdentifier();
 }
 
 ModUtils::~ModUtils()
@@ -242,4 +237,14 @@ bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
         chatHandler.SendSysMessage(LANG_MOD_SI_NOTHING_NO_SELL);
 
     return true;
+}
+
+void ModUtils::BuildItemQualityColorIdentifier()
+{
+    itemQualityColorIdentifier[ITEM_QUALITY_POOR] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Poor", "grey");
+    itemQualityColorIdentifier[ITEM_QUALITY_NORMAL] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Normal", "white");
+    itemQualityColorIdentifier[ITEM_QUALITY_UNCOMMON] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Uncommon", "green");
+    itemQualityColorIdentifier[ITEM_QUALITY_RARE] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Rare", "blue");
+    itemQualityColorIdentifier[ITEM_QUALITY_EPIC] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Epic", "epic");
+    itemQualityColorIdentifier[ITEM_QUALITY_LEGENDARY] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Legendary", "orange");
 }

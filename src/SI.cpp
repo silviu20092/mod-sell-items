@@ -11,6 +11,14 @@
 
 using namespace Acore::ChatCommands;
 
+enum SellItemsModStrings
+{
+    LANG_MOD_SI_SOLD_ITEM = 40000,
+    LANG_MOD_SI_SOLD_ALL_ITEMS = 40001,
+    LANG_MOD_SI_NOTHING_NO_SELL = 40002,
+    LANG_MOD_SI_INVALID_QUALITY = 40003
+};
+
 class si_commandscript : public CommandScript
 {
 public:
@@ -94,7 +102,7 @@ private:
         totalSellPrice += money;
         totalCount += count;
 
-        handler->PSendSysMessage("Sold %dx %s for %d copper.", count, ModUtils::ItemLink(handler, itemTemplate).c_str(), money);
+        handler->PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ModUtils::ItemLink(handler, itemTemplate).c_str(), money);
     }
 
     static bool HandleSellItems(ChatHandler* handler, std::string color)
@@ -107,7 +115,7 @@ private:
         uint32 quality = ModUtils::ColorToQuality(color);
         if (quality == MAX_ITEM_QUALITY)
         {
-            handler->PSendSysMessage("Invalid item quality received.");
+            handler->SendSysMessage(LANG_MOD_SI_INVALID_QUALITY);
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -209,9 +217,9 @@ private:
         }
 
         if (soldItems > 0)
-            handler->PSendSysMessage("Sold a total of %d item(s) for %d copper.", soldItems, totalSellPrice);
+            handler->PSendSysMessage(LANG_MOD_SI_SOLD_ALL_ITEMS, soldItems, totalSellPrice);
         else
-            handler->SendSysMessage("Nothing to sell.");
+            handler->SendSysMessage(LANG_MOD_SI_NOTHING_NO_SELL);
 
         return true;
     }

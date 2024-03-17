@@ -62,6 +62,15 @@ SellItems.SearchBags = 1
 SellItems.SellTradeGoods = 0
 
 #
+#    SellItems.SellQuestItems
+#        Description: Whether to include Quest items as sellable
+#        Values:      0 - Disabled
+#                     1 - Enabled
+#
+
+SellItems.SellQuestItems = 0
+
+#
 #    SellItems.ItemQualityColorIdentifier.XXXX
 #        Description: Identify item quality (poor, normal, rare, epic etc) using specific words.
 #        Example: .sell grey = will sell "Poor" quality items, aka. grey items

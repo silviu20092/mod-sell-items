@@ -39,6 +39,9 @@ private:
         if (!sConfigMgr->GetOption<int32>("SellItems.SellTradeGoods", 0) && itemTemplate->Class == ITEM_CLASS_TRADE_GOODS)
             return;
 
+        if (!sConfigMgr->GetOption<int32>("SellItems.SellQuestItems", 0) && itemTemplate->Class == ITEM_CLASS_QUEST)
+            return;
+
         if (itemTemplate->SellPrice <= 0)
             return;
 

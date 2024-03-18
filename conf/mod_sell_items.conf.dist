@@ -9,12 +9,21 @@
 ########################################
 #
 #    SellItems.SearchBank
-#        Description: Search through player bank and sell matching items - bank bag slots are included also
+#        Description: Search through player bank and sell matching items
 #        Values:      0 - Disabled
 #                     1 - Enabled
 #
 
 SellItems.SearchBank = 0
+
+#
+#    SellItems.SearchBank
+#        Description: Search through player bank bags and sell matching items
+#        Values:      0 - Disabled
+#                     1 - Enabled
+#
+
+SellItems.SearchBankBags = 0
 
 #
 #    SellItems.SearchKeyring

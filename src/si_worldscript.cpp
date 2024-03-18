@@ -12,6 +12,7 @@ public:
     void OnAfterConfigLoad(bool /*reload*/)
     {
         sModUtils->SetSearchBank(sConfigMgr->GetOption<bool>("SellItems.SearchBank", false));
+        sModUtils->SetSearchBankBags(sConfigMgr->GetOption<bool>("SellItems.SearchBankBags", false));
         sModUtils->SetSearchKeyring(sConfigMgr->GetOption<bool>("SellItems.SearchKeyring", true));
         sModUtils->SetSearchEquipped(sConfigMgr->GetOption<bool>("SellItems.SearchEquipped", false));
         sModUtils->SetSearchBackpack(sConfigMgr->GetOption<bool>("SellItems.SearchBackpack", true));

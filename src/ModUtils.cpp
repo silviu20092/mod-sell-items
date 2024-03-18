@@ -11,6 +11,7 @@
 ModUtils::ModUtils()
 {
     searchBank = false;
+    searchBankBags = false;
     searchKeyring = true;
     searchEquipped = false;
     searchBackpack = true;
@@ -202,7 +203,7 @@ bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
         }
     }
 
-    // check in Bank and Bank bags
+    // check in Bank
     if (GetSearchBank())
     {
         for (uint8 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
@@ -214,7 +215,11 @@ bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
                     SellItem(player, item, itemTemplate, totalSellPrice, soldItems);
             }
         }
+    }
 
+    // check in Bank bags
+    if (GetSearchBankBags())
+    {
         for (uint8 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
         {
             if (Bag* bag = player->GetBagByPos(i))

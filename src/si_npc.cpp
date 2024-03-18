@@ -58,6 +58,7 @@ public:
         {
             ClearGossipMenuFor(player);
             AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, FormatFeature("Search bank", sModUtils->GetSearchBank()), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, FormatFeature("Search bank bags", sModUtils->GetSearchBankBags()), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, FormatFeature("Search keyring", sModUtils->GetSearchKeyring()), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, FormatFeature("Search equipped", sModUtils->GetSearchEquipped()), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, FormatFeature("Search backpack", sModUtils->GetSearchBackpack()), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);

@@ -32,6 +32,7 @@ private:
     void SellItem(Player* player, Item* item, const ItemTemplate* itemTemplate, uint32& totalSellPrice, uint32& totalCount);
 private:
     bool searchBank;
+    bool searchBankBags;
     bool searchKeyring;
     bool searchEquipped;
     bool searchBackpack;
@@ -53,6 +54,7 @@ public:
     }
 public:
     void SetSearchBank(bool value) { searchBank = value; }
+    void SetSearchBankBags(bool value) { searchBankBags = value; }
     void SetSearchKeyring(bool value) { searchKeyring = value; }
     void SetSearchEquipped(bool value) { searchEquipped = value; }
     void SetSearchBackpack(bool value) { searchBackpack = value; }
@@ -61,6 +63,7 @@ public:
     void SetSellQuestItems(bool value) { sellQuestItems = value; }
 
     bool GetSearchBank() { return searchBank; }
+    bool GetSearchBankBags() { return searchBankBags; }
     bool GetSearchKeyring() { return searchKeyring; }
     bool GetSearchEquipped() { return searchEquipped; }
     bool GetSearchBackpack() { return searchBackpack; }

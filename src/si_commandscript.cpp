@@ -5,7 +5,6 @@
 #include "ScriptMgr.h"
 #include "ModUtils.h"
 #include "Player.h"
-#include "Config.h"
 #include "Chat.h"
 #include "CommandScript.h"
 

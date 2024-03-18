@@ -30,6 +30,14 @@ private:
 
     std::string ItemLink(ChatHandler* handler, const ItemTemplate* itemTemplate);
     void SellItem(Player* player, Item* item, const ItemTemplate* itemTemplate, uint32& totalSellPrice, uint32& totalCount);
+private:
+    bool searchBank;
+    bool searchKeyring;
+    bool searchEquipped;
+    bool searchBackpack;
+    bool searchBags;
+    bool sellTradeGoods;
+    bool sellQuestItems;
 public:
     static ModUtils* instance();
 
@@ -43,6 +51,22 @@ public:
     {
         return itemQualityColorIdentifier;
     }
+public:
+    void SetSearchBank(bool value) { searchBank = value; }
+    void SetSearchKeyring(bool value) { searchKeyring = value; }
+    void SetSearchEquipped(bool value) { searchEquipped = value; }
+    void SetSearchBackpack(bool value) { searchBackpack = value; }
+    void SetSearchBags(bool value) { searchBags = value; }
+    void SetSellTradeGoods(bool value) { sellTradeGoods = value; }
+    void SetSellQuestItems(bool value) { sellQuestItems = value; }
+
+    bool GetSearchBank() { return searchBank; }
+    bool GetSearchKeyring() { return searchKeyring; }
+    bool GetSearchEquipped() { return searchEquipped; }
+    bool GetSearchBackpack() { return searchBackpack; }
+    bool GetSearchBags() { return searchBags; }
+    bool GetSellTradeGoods() { return sellTradeGoods; }
+    bool GetSellQuestItems() { return sellQuestItems; }
 };
 
 #define sModUtils ModUtils::instance()

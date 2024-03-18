@@ -9,10 +9,17 @@ public:
     {
     }
 
-    void OnAfterConfigLoad(bool reload)
+    void OnAfterConfigLoad(bool /*reload*/)
     {
-        if (reload)
-            sModUtils->BuildItemQualityColorIdentifier();
+        sModUtils->SetSearchBank(sConfigMgr->GetOption<bool>("SellItems.SearchBank", false));
+        sModUtils->SetSearchKeyring(sConfigMgr->GetOption<bool>("SellItems.SearchKeyring", true));
+        sModUtils->SetSearchEquipped(sConfigMgr->GetOption<bool>("SellItems.SearchEquipped", false));
+        sModUtils->SetSearchBackpack(sConfigMgr->GetOption<bool>("SellItems.SearchBackpack", true));
+        sModUtils->SetSearchBags(sConfigMgr->GetOption<bool>("SellItems.SearchBags", true));
+        sModUtils->SetSellTradeGoods(sConfigMgr->GetOption<bool>("SellItems.SellTradeGoods", false));
+        sModUtils->SetSellQuestItems(sConfigMgr->GetOption<bool>("SellItems.SellQuestItems", false));
+
+        sModUtils->BuildItemQualityColorIdentifier();
     }
 };
 

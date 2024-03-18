@@ -10,13 +10,16 @@
 
 ModUtils::ModUtils()
 {
-    BuildItemQualityColorIdentifier();
+    searchBank = false;
+    searchKeyring = true;
+    searchEquipped = false;
+    searchBackpack = true;
+    searchBags = true;
+    sellTradeGoods = false;
+    sellQuestItems = false;
 }
 
-ModUtils::~ModUtils()
-{
-
-}
+ModUtils::~ModUtils() { }
 
 ModUtils* ModUtils::instance()
 {
@@ -61,10 +64,10 @@ std::string ModUtils::ItemLink(ChatHandler* handler, const ItemTemplate* itemTem
 
 void ModUtils::SellItem(Player* player, Item* item, const ItemTemplate* itemTemplate, uint32& totalSellPrice, uint32& totalCount)
 {
-    if (!sConfigMgr->GetOption<int32>("SellItems.SellTradeGoods", 0) && itemTemplate->Class == ITEM_CLASS_TRADE_GOODS)
+    if (!GetSellTradeGoods() && itemTemplate->Class == ITEM_CLASS_TRADE_GOODS)
         return;
 
-    if (!sConfigMgr->GetOption<int32>("SellItems.SellQuestItems", 0) && itemTemplate->Class == ITEM_CLASS_QUEST)
+    if (!GetSellQuestItems() && itemTemplate->Class == ITEM_CLASS_QUEST)
         return;
 
     if (itemTemplate->SellPrice <= 0)
@@ -138,7 +141,7 @@ bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
     uint32 soldItems = 0;
 
     // check in Backpack (main bag)
-    if (sConfigMgr->GetOption<int32>("SellItems.SearchBackpack", 1))
+    if (GetSearchBackpack())
     {
         for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
         {
@@ -152,7 +155,7 @@ bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
     }
 
     // check in the 4-bag slots
-    if (sConfigMgr->GetOption<int32>("SellItems.SearchBags", 1))
+    if (GetSearchBags())
     {
         for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
         {
@@ -172,9 +175,9 @@ bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
     }
 
     // check in keyring slots
-    if (sConfigMgr->GetOption<int32>("SellItems.SearchKeyring", 1))
+    if (GetSearchKeyring())
     {
-        for (uint8 i = KEYRING_SLOT_START; i < CURRENCYTOKEN_SLOT_END; ++i)
+        for (uint8 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
         {
             if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             {
@@ -186,9 +189,9 @@ bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
     }
 
     // check in equipped items
-    if (sConfigMgr->GetOption<int32>("SellItems.SearchEquipped", 0))
+    if (GetSearchEquipped())
     {
-        for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+        for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
         {
             if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             {
@@ -200,7 +203,7 @@ bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
     }
 
     // check in Bank and Bank bags
-    if (sConfigMgr->GetOption<int32>("SellItems.SearchBank", 0))
+    if (GetSearchBank())
     {
         for (uint8 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
         {

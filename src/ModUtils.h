@@ -28,7 +28,7 @@ private:
 
     std::map<uint32, std::string> itemQualityColorIdentifier;
 
-    std::string ItemLink(ChatHandler* handler, const ItemTemplate* itemTemplate);
+    std::string ItemLink(const Player* player, const ItemTemplate* itemTemplate) const;
     void SellItem(Player* player, Item* item, const ItemTemplate* itemTemplate, uint32& totalSellPrice, uint32& totalCount);
 private:
     bool searchBank;
@@ -52,6 +52,12 @@ public:
     {
         return itemQualityColorIdentifier;
     }
+
+    std::string ItemLink(const Player* player, uint32 entry) const;
+    std::string ItemIcon(uint32 entry, uint32 width, uint32 height, int x, int y) const;
+    std::string ItemIcon(uint32 entry) const;
+
+    std::string CopperToMoneyStr(uint32 money, bool colored) const;
 public:
     void SetSearchBank(bool value) { searchBank = value; }
     void SetSearchBankBags(bool value) { searchBankBags = value; }

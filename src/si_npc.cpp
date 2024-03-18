@@ -1,5 +1,6 @@
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
+#include "Player.h"
 #include "ModUtils.h"
 
 class si_npc : public CreatureScript
@@ -23,6 +24,80 @@ private:
         oss << "|cff" << (configValue ? "048a2cYES" : "b50f04NO") << "|r";
         return oss.str();
     }
+
+    static std::string BuybackItemLink(const Item* item, const Player* player, uint32 slot)
+    {
+        std::ostringstream oss;
+        oss << sModUtils->ItemIcon(item->GetEntry());
+        oss << sModUtils->ItemLink(player, item->GetEntry());
+        if (item->GetCount() > 1)
+            oss << " - " << item->GetCount() << "x";
+        oss << " - " << sModUtils->CopperToMoneyStr(player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START), true);
+        return oss.str();
+    }
+private:
+    void AddBuybackMenu(Player* player, Creature* creature)
+    {
+        bool found = false;
+        for (uint32 slot = BUYBACK_SLOT_START; slot < BUYBACK_SLOT_END; slot++)
+        {
+            Item* item = player->GetItemFromBuyBackSlot(slot);
+            if (item)
+            {
+                found = true;
+                AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, BuybackItemLink(item, player, slot), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 200 + slot);
+            }
+        }
+
+        if (!found)
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "[NO ITEMS IN BUYBACK]", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 200);
+
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, "<- [Back]", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+        SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+    }
+
+    bool HandleBuybackItem(Player* player, Creature* creature, uint32 slot)
+    {
+        Item* item = player->GetItemFromBuyBackSlot(slot);
+        if (!item)
+        {
+            player->SendBuyError(BUY_ERR_CANT_FIND_ITEM, nullptr, 0, 0);
+            return false;
+        }
+
+        uint32 price = player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START);
+        if (!player->HasEnoughMoney(price))
+        {
+            player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, nullptr, item->GetEntry(), 0);
+            return false;
+        }
+
+        ItemPosCountVec dest;
+        InventoryResult msg = player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, item, false);
+        if (msg == EQUIP_ERR_OK)
+        {
+            if (sWorld->getBoolConfig(CONFIG_ITEMDELETE_VENDOR))
+            {
+                CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_RECOVERY_ITEM);
+                stmt->SetData(0, player->GetGUID().GetCounter());
+                stmt->SetData(1, item->GetEntry());
+                stmt->SetData(2, item->GetCount());
+                CharacterDatabase.Execute(stmt);
+            }
+
+            player->ModifyMoney(-(int32)price);
+            player->RemoveItemFromBuyBackSlot(slot, false);
+            player->ItemAddedQuestCheck(item->GetEntry(), item->GetCount());
+            player->StoreItem(dest, item, true);
+        }
+        else
+        {
+            player->SendEquipError(msg, item, nullptr);
+            return false;
+        }
+
+        return true;
+    }
 public:
     si_npc() : CreatureScript("si_npc")
     {
@@ -36,6 +111,7 @@ public:
         for (auto it = itemQualityMap.begin(); it != itemQualityMap.end(); ++it)
             AddGossipItemFor(player, GOSSIP_ICON_VENDOR, FormatSellMenu(it->first, it->second), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2 + std::distance(itemQualityMap.begin(), it), "Are you sure?", 0, false);
 
+        AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, "Buyback", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 200);
         AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Nevermind", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 100);
         SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         return true;
@@ -53,6 +129,27 @@ public:
         {
             CloseGossipMenuFor(player);
             return true;
+        }
+        else if (action == GOSSIP_ACTION_INFO_DEF + 200)
+        {
+            ClearGossipMenuFor(player);
+            AddBuybackMenu(player, creature);
+            return true;
+        }
+        else if (action > GOSSIP_ACTION_INFO_DEF + 200)
+        {
+            const uint32 slot = action - (GOSSIP_ACTION_INFO_DEF + 200);
+            if (HandleBuybackItem(player, creature, slot))
+            {
+                ClearGossipMenuFor(player);
+                AddBuybackMenu(player, creature);
+                return true;
+            }
+            else
+            {
+                CloseGossipMenuFor(player);
+                return false;
+            }
         }
         else if (action == GOSSIP_ACTION_INFO_DEF + 1)
         {

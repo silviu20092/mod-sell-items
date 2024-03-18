@@ -44,9 +44,9 @@ uint32 ModUtils::ColorToQuality(const std::string& color)
     return MAX_ITEM_QUALITY;
 }
 
-std::string ModUtils::ItemLink(ChatHandler* handler, const ItemTemplate* itemTemplate)
+std::string ModUtils::ItemLink(const Player* player, const ItemTemplate* itemTemplate) const
 {
-    LocaleConstant loc_idx = handler->GetSession()->GetSessionDbLocaleIndex();
+    LocaleConstant loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
     std::string name = itemTemplate->Name1;
     if (ItemLocale const* il = sObjectMgr->GetItemLocale(itemTemplate->ItemId))
         ObjectMgr::GetLocaleString(il->Name, loc_idx, name);
@@ -61,6 +61,12 @@ std::string ModUtils::ItemLink(ChatHandler* handler, const ItemTemplate* itemTem
     oss << "]|h|r";
 
     return oss.str();
+}
+
+std::string ModUtils::ItemLink(const Player* player, uint32 entry) const
+{
+    const ItemTemplate* itemTemplate = sObjectMgr->GetItemTemplate(entry);
+    return ItemLink(player, itemTemplate);
 }
 
 void ModUtils::SellItem(Player* player, Item* item, const ItemTemplate* itemTemplate, uint32& totalSellPrice, uint32& totalCount)
@@ -133,7 +139,7 @@ void ModUtils::SellItem(Player* player, Item* item, const ItemTemplate* itemTemp
     totalCount += count;
 
     ChatHandler chatHandler(player->GetSession());
-    chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ItemLink(&chatHandler, itemTemplate).c_str(), money);
+    chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ItemLink(player, itemTemplate).c_str(), money);
 }
 
 bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
@@ -255,4 +261,59 @@ void ModUtils::BuildItemQualityColorIdentifier()
     itemQualityColorIdentifier[ITEM_QUALITY_RARE] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Rare", "blue");
     itemQualityColorIdentifier[ITEM_QUALITY_EPIC] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Epic", "epic");
     itemQualityColorIdentifier[ITEM_QUALITY_LEGENDARY] = sConfigMgr->GetOption<std::string>("SellItems.ItemQualityColorIdentifier.Legendary", "orange");
+}
+
+std::string ModUtils::ItemIcon(uint32 entry, uint32 width, uint32 height, int x, int y) const
+{
+    std::ostringstream ss;
+    ss << "|TInterface";
+    const ItemTemplate* temp = sObjectMgr->GetItemTemplate(entry);
+    const ItemDisplayInfoEntry* dispInfo = NULL;
+    if (temp)
+    {
+        dispInfo = sItemDisplayInfoStore.LookupEntry(temp->DisplayInfoID);
+        if (dispInfo)
+            ss << "/ICONS/" << dispInfo->inventoryIcon;
+    }
+    if (!dispInfo)
+        ss << "/InventoryItems/WoWUnknownItem01";
+    ss << ":" << width << ":" << height << ":" << x << ":" << y << "|t";
+    return ss.str();
+}
+
+std::string ModUtils::ItemIcon(uint32 entry) const
+{
+    return ItemIcon(entry, 30, 30, 0, 0);
+}
+
+std::string ModUtils::CopperToMoneyStr(uint32 money, bool colored) const
+{
+    uint32 gold = money / GOLD;
+    uint32 silver = (money % GOLD) / SILVER;
+    uint32 copper = (money % GOLD) % SILVER;
+
+    std::ostringstream oss;
+    if (gold > 0)
+    {
+        if (colored)
+            oss << gold << "|cffD9B430g|r";
+        else
+            oss << gold << "g";
+    }
+    if (silver > 0)
+    {
+        if (colored)
+            oss << silver << "|cff7E7C7Fs|r";
+        else
+            oss << silver << "s";
+    }
+    if (copper > 0)
+    {
+        if (colored)
+            oss << copper << "|cff974B29c|r";
+        else
+            oss << copper << "c";
+    }
+
+    return oss.str();
 }

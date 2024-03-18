@@ -139,7 +139,7 @@ void ModUtils::SellItem(Player* player, Item* item, const ItemTemplate* itemTemp
     totalCount += count;
 
     ChatHandler chatHandler(player->GetSession());
-    chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ItemLink(player, itemTemplate).c_str(), money);
+    chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ItemLink(player, itemTemplate).c_str(), CopperToMoneyStr(money, false).c_str());
 }
 
 bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
@@ -246,7 +246,7 @@ bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
     ChatHandler chatHandler(player->GetSession());
 
     if (soldItems > 0)
-        chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ALL_ITEMS, soldItems, totalSellPrice);
+        chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ALL_ITEMS, soldItems, CopperToMoneyStr(totalSellPrice, false).c_str());
     else
         chatHandler.SendSysMessage(LANG_MOD_SI_NOTHING_NO_SELL);
 

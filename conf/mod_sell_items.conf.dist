@@ -17,7 +17,7 @@
 SellItems.SearchBank = 0
 
 #
-#    SellItems.SearchBank
+#    SellItems.SearchBankBags
 #        Description: Search through player bank bags and sell matching items
 #        Values:      0 - Disabled
 #                     1 - Enabled

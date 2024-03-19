@@ -44,20 +44,24 @@ uint32 ModUtils::ColorToQuality(const std::string& color)
     return MAX_ITEM_QUALITY;
 }
 
-std::string ModUtils::ItemLink(const Player* player, const ItemTemplate* itemTemplate) const
+std::string ModUtils::ItemNameWithLocale(const Player* player, const ItemTemplate* itemTemplate) const
 {
     LocaleConstant loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
     std::string name = itemTemplate->Name1;
     if (ItemLocale const* il = sObjectMgr->GetItemLocale(itemTemplate->ItemId))
         ObjectMgr::GetLocaleString(il->Name, loc_idx, name);
+    return name;
+}
 
+std::string ModUtils::ItemLink(const Player* player, const ItemTemplate* itemTemplate) const
+{
     std::stringstream oss;
     oss << "|c";
     oss << std::hex << ItemQualityColors[itemTemplate->Quality] << std::dec;
     oss << "|Hitem:";
     oss << itemTemplate->ItemId;
     oss << ":0:0:0:0:0:0:0:0:0|h[";
-    oss << name;
+    oss << ItemNameWithLocale(player, itemTemplate);
     oss << "]|h|r";
 
     return oss.str();
@@ -97,35 +101,8 @@ void ModUtils::SellItem(Player* player, Item* item, const ItemTemplate* itemTemp
     if (player->GetMoney() >= MAX_MONEY_AMOUNT - money)
         return;
 
-    uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
-    if (maxDurability)
-    {
-        uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
-        uint32 LostDurability = maxDurability - curDurability;
-
-        if (LostDurability > 0)
-        {
-            DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(itemTemplate->ItemLevel);
-            if (!dcost)
-                return;
-
-            uint32 dQualitymodEntryId = (itemTemplate->Quality + 1) * 2;
-            DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
-            if (!dQualitymodEntry)
-                return;
-
-            uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(itemTemplate->Class, itemTemplate->SubClass)];
-            uint32 refund = uint32(std::ceil(LostDurability * dmultiplier * double(dQualitymodEntry->quality_mod)));
-
-            if (!refund)
-                refund = 1;
-
-            if (refund > money)
-                money = 1;
-            else
-                money -= refund;
-        }
-    }
+    if (!CalculateDurabilityMoney(item, itemTemplate, money))
+        return;
 
     player->ItemRemovedQuestCheck(item->GetEntry(), item->GetCount());
     player->RemoveItem(item->GetBagSlot(), item->GetSlot(), true);
@@ -316,4 +293,109 @@ std::string ModUtils::CopperToMoneyStr(uint32 money, bool colored) const
     }
 
     return oss.str();
+}
+
+bool ModUtils::CalculateDurabilityMoney(const Item* item, const ItemTemplate* itemTemplate, uint32& money) const
+{
+    uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+    if (maxDurability)
+    {
+        uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+        uint32 LostDurability = maxDurability - curDurability;
+
+        if (LostDurability > 0)
+        {
+            DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(itemTemplate->ItemLevel);
+            if (!dcost)
+                return false;
+
+            uint32 dQualitymodEntryId = (itemTemplate->Quality + 1) * 2;
+            DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
+            if (!dQualitymodEntry)
+                return false;
+
+            uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(itemTemplate->Class, itemTemplate->SubClass)];
+            uint32 refund = uint32(std::ceil(LostDurability * dmultiplier * double(dQualitymodEntry->quality_mod)));
+
+            if (!refund)
+                refund = 1;
+
+            if (refund > money)
+                money = 1;
+            else
+                money -= refund;
+        }
+    }
+    return true;
+}
+
+bool ModUtils::CalculateSellPrice(const Item* item, const ItemTemplate* itemTemplate, uint32& money) const
+{
+    money = itemTemplate->SellPrice * item->GetCount();
+
+    if (!CalculateDurabilityMoney(item, itemTemplate, money))
+        return false;
+
+    return true;
+}
+
+bool ModUtils::SellItem(Player* player, Creature* creature, Item* item) const
+{
+    const ItemTemplate* itemTemplate = item->GetTemplate();
+    const ObjectGuid itemguid = item->GetGUID();
+
+    if (itemTemplate->SellPrice <= 0)
+    {
+        player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemguid, 0);
+        return false;
+    }
+
+    if (item->GetOwnerGUID() != player->GetGUID())
+    {
+        player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemguid, 0);
+        return false;
+    }
+
+    if (item->IsNotEmptyBag())
+    {
+        player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemguid, 0);
+        return false;
+    }
+
+    if (player->GetLootGUID() == item->GetGUID())
+    {
+        player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemguid, 0);
+        return false;
+    }
+
+    if (item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_REFUNDABLE))
+        return false;
+
+    uint32 count = item->GetCount();
+    uint32 money = itemTemplate->SellPrice * count;
+    if (player->GetMoney() >= MAX_MONEY_AMOUNT - money)
+    {
+        player->SendEquipError(EQUIP_ERR_TOO_MUCH_GOLD, nullptr, nullptr);
+        player->SendSellError(SELL_ERR_UNK, creature, itemguid, 0);
+        return false;
+    }
+
+    if (!CalculateDurabilityMoney(item, itemTemplate, money))
+    {
+        player->SendSellError(SELL_ERR_CANT_SELL_ITEM, creature, itemguid, 0);
+        return false;
+    }
+
+    player->ItemRemovedQuestCheck(item->GetEntry(), item->GetCount());
+    player->RemoveItem(item->GetBagSlot(), item->GetSlot(), true);
+    item->RemoveFromUpdateQueueOf(player);
+    player->AddItemToBuyBackSlot(item, money);
+    player->UpdateTitansGrip();
+
+    player->ModifyMoney(money);
+
+    ChatHandler chatHandler(player->GetSession());
+    chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ItemLink(player, itemTemplate).c_str(), CopperToMoneyStr(money, false).c_str());
+
+    return true;
 }

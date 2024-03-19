@@ -56,7 +56,7 @@ private:
         SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
     }
 
-    bool HandleBuybackItem(Player* player, Creature* creature, uint32 slot)
+    bool HandleBuybackItem(Player* player, uint32 slot)
     {
         Item* item = player->GetItemFromBuyBackSlot(slot);
         if (!item)
@@ -139,7 +139,7 @@ public:
         else if (action > GOSSIP_ACTION_INFO_DEF + 200)
         {
             const uint32 slot = action - (GOSSIP_ACTION_INFO_DEF + 200);
-            if (HandleBuybackItem(player, creature, slot))
+            if (HandleBuybackItem(player, slot))
             {
                 ClearGossipMenuFor(player);
                 AddBuybackMenu(player, creature);

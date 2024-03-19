@@ -185,7 +185,7 @@ private:
         }
     }
 
-    bool AddSellItemsPage(Player* player, Creature* creature, uint32 page)
+    bool AddSellItemsPage(Player* player, uint32 page)
     {
         if (itemCatalogue.size() == 0 || (page + 1) > totalPages)
             return false;
@@ -292,7 +292,7 @@ public:
 
             BuildSellItemsCatalogue(player);
             currentPage = action - (GOSSIP_ACTION_INFO_DEF + 500);
-            if (!AddSellItemsPage(player, creature, currentPage))
+            if (!AddSellItemsPage(player, currentPage))
             {
                 ChatHandler(player->GetSession()).SendSysMessage("There is nothing to sell on current page.");
                 CloseGossipMenuFor(player);
@@ -315,7 +315,7 @@ public:
             {
                 ClearGossipMenuFor(player);
                 BuildSellItemsCatalogue(player);
-                if (!AddSellItemsPage(player, creature, currentPage))
+                if (!AddSellItemsPage(player, currentPage))
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("There is nothing to sell on current page.");
                     CloseGossipMenuFor(player);

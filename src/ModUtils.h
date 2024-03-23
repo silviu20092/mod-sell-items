@@ -52,9 +52,10 @@ public:
         return itemQualityColorIdentifier;
     }
 
-    std::string ItemNameWithLocale(const Player* player, const ItemTemplate* itemTemplate) const;
-    std::string ItemLink(const Player* player, const ItemTemplate* itemTemplate) const;
-    std::string ItemLink(const Player* player, uint32 entry) const;
+    std::string ItemNameWithLocale(const Player* player, const ItemTemplate* itemTemplate, int32 randomPropertyId) const;
+    std::string ItemLink(const Player* player, const ItemTemplate* itemTemplate, int32 randomPropertyId) const;
+    std::string ItemLink(const Player* player, uint32 entry, int32 randomPropertyId) const;
+    std::string ItemLink(const Player* player, const Item* item) const;
     std::string ItemIcon(uint32 entry, uint32 width, uint32 height, int x, int y) const;
     std::string ItemIcon(uint32 entry) const;
 

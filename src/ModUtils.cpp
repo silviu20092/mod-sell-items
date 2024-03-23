@@ -44,16 +44,38 @@ uint32 ModUtils::ColorToQuality(const std::string& color)
     return MAX_ITEM_QUALITY;
 }
 
-std::string ModUtils::ItemNameWithLocale(const Player* player, const ItemTemplate* itemTemplate) const
+std::string ModUtils::ItemNameWithLocale(const Player* player, const ItemTemplate* itemTemplate, int32 randomPropertyId) const
 {
     LocaleConstant loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
     std::string name = itemTemplate->Name1;
     if (ItemLocale const* il = sObjectMgr->GetItemLocale(itemTemplate->ItemId))
         ObjectMgr::GetLocaleString(il->Name, loc_idx, name);
+
+    std::array<char const*, 16> const* suffix = nullptr;
+    if (randomPropertyId < 0)
+    {
+        if (const ItemRandomSuffixEntry* itemRandEntry = sItemRandomSuffixStore.LookupEntry(-randomPropertyId))
+            suffix = &itemRandEntry->Name;
+    }
+    else
+    {
+        if (const ItemRandomPropertiesEntry* itemRandEntry = sItemRandomPropertiesStore.LookupEntry(randomPropertyId))
+            suffix = &itemRandEntry->Name;
+    }
+    if (suffix)
+    {
+        std::string_view test((*suffix)[(name != itemTemplate->Name1) ? loc_idx : DEFAULT_LOCALE]);
+        if (!test.empty())
+        {
+            name += ' ';
+            name += test;
+        }
+    }
+
     return name;
 }
 
-std::string ModUtils::ItemLink(const Player* player, const ItemTemplate* itemTemplate) const
+std::string ModUtils::ItemLink(const Player* player, const ItemTemplate* itemTemplate, int32 randomPropertyId) const
 {
     std::stringstream oss;
     oss << "|c";
@@ -61,16 +83,33 @@ std::string ModUtils::ItemLink(const Player* player, const ItemTemplate* itemTem
     oss << "|Hitem:";
     oss << itemTemplate->ItemId;
     oss << ":0:0:0:0:0:0:0:0:0|h[";
-    oss << ItemNameWithLocale(player, itemTemplate);
+    oss << ItemNameWithLocale(player, itemTemplate, randomPropertyId);
     oss << "]|h|r";
 
     return oss.str();
 }
 
-std::string ModUtils::ItemLink(const Player* player, uint32 entry) const
+std::string ModUtils::ItemLink(const Player* player, const Item* item) const
+{
+    const ItemTemplate* itemTemplate = item->GetTemplate();
+    std::ostringstream oss;
+    oss << "|c" << std::hex << ItemQualityColors[itemTemplate->Quality] << std::dec
+        << "|Hitem:" << itemTemplate->ItemId << ":"
+        << item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT) << ":"
+        << item->GetEnchantmentId(SOCK_ENCHANTMENT_SLOT) << ":"
+        << item->GetEnchantmentId(SOCK_ENCHANTMENT_SLOT_2) << ":"
+        << item->GetEnchantmentId(SOCK_ENCHANTMENT_SLOT_3) << ":"
+        << item->GetEnchantmentId(BONUS_ENCHANTMENT_SLOT) << ":"
+        << item->GetItemRandomPropertyId() << ":" << item->GetItemSuffixFactor() << ":"
+        << (uint32)0 << "|h[" << ItemNameWithLocale(player, itemTemplate, item->GetItemRandomPropertyId()) << "]|h|r";
+
+    return oss.str();
+}
+
+std::string ModUtils::ItemLink(const Player* player, uint32 entry, int32 randomPropertyId) const
 {
     const ItemTemplate* itemTemplate = sObjectMgr->GetItemTemplate(entry);
-    return ItemLink(player, itemTemplate);
+    return ItemLink(player, itemTemplate, randomPropertyId);
 }
 
 void ModUtils::SellItem(Player* player, Item* item, const ItemTemplate* itemTemplate, uint32& totalSellPrice, uint32& totalCount)
@@ -116,7 +155,7 @@ void ModUtils::SellItem(Player* player, Item* item, const ItemTemplate* itemTemp
     totalCount += count;
 
     ChatHandler chatHandler(player->GetSession());
-    chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ItemLink(player, itemTemplate).c_str(), CopperToMoneyStr(money, false).c_str());
+    chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ItemLink(player, item).c_str(), CopperToMoneyStr(money, false).c_str());
 }
 
 bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
@@ -395,7 +434,7 @@ bool ModUtils::SellItem(Player* player, Creature* creature, Item* item) const
     player->ModifyMoney(money);
 
     ChatHandler chatHandler(player->GetSession());
-    chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ItemLink(player, itemTemplate).c_str(), CopperToMoneyStr(money, false).c_str());
+    chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ItemLink(player, item).c_str(), CopperToMoneyStr(money, false).c_str());
 
     return true;
 }

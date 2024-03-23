@@ -53,7 +53,7 @@ private:
     {
         std::ostringstream oss;
         oss << sModUtils->ItemIcon(item->GetEntry());
-        oss << sModUtils->ItemLink(player, item->GetEntry());
+        oss << sModUtils->ItemLink(player, item->GetEntry(), item->GetItemRandomPropertyId());
         if (item->GetCount() > 1)
             oss << " - " << item->GetCount() << "x";
         oss << " - " << sModUtils->CopperToMoneyStr(player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START), true);
@@ -126,11 +126,11 @@ private:
         ItemInfo itemInfo;
         itemInfo.action = GOSSIP_ACTION_INFO_DEF + 800 + pageInfo.itemCatalogue.size();
         itemInfo.guid = item->GetGUID();
-        itemInfo.name = sModUtils->ItemNameWithLocale(player, itemTemplate);
+        itemInfo.name = sModUtils->ItemNameWithLocale(player, itemTemplate, item->GetItemRandomPropertyId());
 
         std::ostringstream oss;
         oss << sModUtils->ItemIcon(item->GetEntry());
-        oss << sModUtils->ItemLink(player, itemTemplate);
+        oss << sModUtils->ItemLink(player, itemTemplate, item->GetItemRandomPropertyId());
         if (item->GetCount() > 1)
             oss << " - " << item->GetCount() << "x";
         oss << " - ";

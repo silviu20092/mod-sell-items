@@ -17,13 +17,18 @@ struct ItemInfo
     }
 };
 
-class si_npc : public CreatureScript
+struct PageInfo
 {
-private:
     std::vector<ItemInfo> itemCatalogue;
     static constexpr int PAGE_SIZE = 12;
     uint32 totalPages = 0;
     uint32 currentPage = 0;
+};
+
+class si_npc : public CreatureScript
+{
+private:
+    std::unordered_map<uint32, PageInfo> pageInfoMap;
 private:
     static std::string FormatSellMenu(uint32 quality, const std::string& text)
     {
@@ -109,7 +114,7 @@ private:
         return true;
     }
 
-    void AddItemToCatalogue(const Player* player, const Item* item, bool fromBank)
+    void AddItemToCatalogue(const Player* player, const Item* item, PageInfo& pageInfo, bool fromBank)
     {
         ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(item->GetEntry());
         if (!itemTemplate)
@@ -119,7 +124,7 @@ private:
             return;
 
         ItemInfo itemInfo;
-        itemInfo.action = GOSSIP_ACTION_INFO_DEF + 800 + itemCatalogue.size();
+        itemInfo.action = GOSSIP_ACTION_INFO_DEF + 800 + pageInfo.itemCatalogue.size();
         itemInfo.guid = item->GetGUID();
         itemInfo.name = sModUtils->ItemNameWithLocale(player, itemTemplate);
 
@@ -139,84 +144,84 @@ private:
             oss << " - IN BANK";
         itemInfo.uiName = oss.str();
 
-        itemCatalogue.push_back(itemInfo);
+        pageInfo.itemCatalogue.push_back(itemInfo);
     }
 
-    void BuildSellItemsCatalogue(const Player* player)
+    void BuildSellItemsCatalogue(const Player* player, PageInfo& pageInfo)
     {
-        itemCatalogue.clear();
-        totalPages = 0;
+        pageInfo.itemCatalogue.clear();
+        pageInfo.totalPages = 0;
 
         for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
             if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-                AddItemToCatalogue(player, item, false);
+                AddItemToCatalogue(player, item, pageInfo, false);
 
         for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
             if (Bag* bag = player->GetBagByPos(i))
                 for (uint32 j = 0; j < bag->GetBagSize(); j++)
                     if (Item* item = player->GetItemByPos(i, j))
-                        AddItemToCatalogue(player, item, false);
+                        AddItemToCatalogue(player, item, pageInfo, false);
 
         for (uint8 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
             if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-                AddItemToCatalogue(player, item, false);
+                AddItemToCatalogue(player, item, pageInfo, false);
 
         for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
             if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-                AddItemToCatalogue(player, item, false);
+                AddItemToCatalogue(player, item, pageInfo, false);
 
         for (uint8 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
             if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-                AddItemToCatalogue(player, item, true);
+                AddItemToCatalogue(player, item, pageInfo, true);
 
         for (uint8 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
             if (Bag* bag = player->GetBagByPos(i))
                 for (uint32 j = 0; j < bag->GetBagSize(); j++)
                     if (Item* item = player->GetItemByPos(i, j))
-                        AddItemToCatalogue(player, item, true);
+                        AddItemToCatalogue(player, item, pageInfo, true);
 
-        if (itemCatalogue.size() > 0)
+        if (pageInfo.itemCatalogue.size() > 0)
         {
-            std::sort(itemCatalogue.begin(), itemCatalogue.end());
+            std::sort(pageInfo.itemCatalogue.begin(), pageInfo.itemCatalogue.end());
 
-            totalPages = itemCatalogue.size() / PAGE_SIZE;
-            if (itemCatalogue.size() % PAGE_SIZE != 0)
-                totalPages++;
+            pageInfo.totalPages = pageInfo.itemCatalogue.size() / PageInfo::PAGE_SIZE;
+            if (pageInfo.itemCatalogue.size() % PageInfo::PAGE_SIZE != 0)
+                pageInfo.totalPages++;
         }
     }
 
-    bool AddSellItemsPage(Player* player, uint32 page)
+    bool AddSellItemsPage(Player* player, uint32 page, const PageInfo& pageInfo)
     {
-        if (itemCatalogue.size() == 0 || (page + 1) > totalPages)
+        if (pageInfo.itemCatalogue.size() == 0 || (page + 1) > pageInfo.totalPages)
             return false;
 
-        uint32 lowIndex = page * PAGE_SIZE;
-        if (itemCatalogue.size() <= lowIndex)
+        uint32 lowIndex = page * PageInfo::PAGE_SIZE;
+        if (pageInfo.itemCatalogue.size() <= lowIndex)
             return false;
 
-        uint32 highIndex = lowIndex + PAGE_SIZE - 1;
-        if (highIndex >= itemCatalogue.size())
-            highIndex = itemCatalogue.size() - 1;
+        uint32 highIndex = lowIndex + PageInfo::PAGE_SIZE - 1;
+        if (highIndex >= pageInfo.itemCatalogue.size())
+            highIndex = pageInfo.itemCatalogue.size() - 1;
 
         for (uint32 i = lowIndex; i <= highIndex; i++)
         {
-            const ItemInfo& itemInfo = itemCatalogue[i];
+            const ItemInfo& itemInfo = pageInfo.itemCatalogue[i];
             AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, itemInfo.uiName, GOSSIP_SENDER_MAIN, itemInfo.action);
         }
 
-        if (page + 1 < totalPages)
+        if (page + 1 < pageInfo.totalPages)
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "[Next] ->", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 500 + page + 1);
         AddGossipItemFor(player, GOSSIP_ICON_CHAT, "<- [Back]", GOSSIP_SENDER_MAIN, page == 0 ? GOSSIP_ACTION_INFO_DEF : GOSSIP_ACTION_INFO_DEF + 500 + page - 1);
 
         return true;
     }
 
-    const ItemInfo* FindItemInfo(uint32 identifier) const
+    const ItemInfo* FindItemInfo(uint32 identifier, const PageInfo& pageInfo) const
     {
-        std::vector<ItemInfo>::const_iterator citer = std::find_if(itemCatalogue.begin(), itemCatalogue.end(), [&identifier](const ItemInfo& itemInfo) {
+        std::vector<ItemInfo>::const_iterator citer = std::find_if(pageInfo.itemCatalogue.begin(), pageInfo.itemCatalogue.end(), [&identifier](const ItemInfo& itemInfo) {
             return itemInfo.action == identifier;
         });
-        if (citer != itemCatalogue.end())
+        if (citer != pageInfo.itemCatalogue.end())
             return &*citer;
         return nullptr;
     }
@@ -254,6 +259,7 @@ public:
 
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
+        PageInfo& pageInfo = pageInfoMap[player->GetGUID().GetCounter()];
         if (action == GOSSIP_ACTION_INFO_DEF)
         {
             ClearGossipMenuFor(player);
@@ -290,9 +296,9 @@ public:
         {
             ClearGossipMenuFor(player);
 
-            BuildSellItemsCatalogue(player);
-            currentPage = action - (GOSSIP_ACTION_INFO_DEF + 500);
-            if (!AddSellItemsPage(player, currentPage))
+            BuildSellItemsCatalogue(player, pageInfo);
+            pageInfo.currentPage = action - (GOSSIP_ACTION_INFO_DEF + 500);
+            if (!AddSellItemsPage(player, pageInfo.currentPage, pageInfo))
             {
                 ChatHandler(player->GetSession()).SendSysMessage("There is nothing to sell on current page.");
                 CloseGossipMenuFor(player);
@@ -304,7 +310,7 @@ public:
         }
         else if (action >= GOSSIP_ACTION_INFO_DEF + 800)
         {
-            const ItemInfo* itemInfo = FindItemInfo(action);
+            const ItemInfo* itemInfo = FindItemInfo(action, pageInfo);
             if (itemInfo == nullptr)
             {
                 ChatHandler(player->GetSession()).SendSysMessage("Could not sell item.");
@@ -314,8 +320,8 @@ public:
             if (HandleSellItemByInfo(itemInfo, player, creature))
             {
                 ClearGossipMenuFor(player);
-                BuildSellItemsCatalogue(player);
-                if (!AddSellItemsPage(player, currentPage))
+                BuildSellItemsCatalogue(player, pageInfo);
+                if (!AddSellItemsPage(player, pageInfo.currentPage, pageInfo))
                 {
                     ChatHandler(player->GetSession()).SendSysMessage("There is nothing to sell on current page.");
                     CloseGossipMenuFor(player);

@@ -101,7 +101,7 @@ std::string ModUtils::ItemLink(const Player* player, const Item* item) const
         << item->GetEnchantmentId(SOCK_ENCHANTMENT_SLOT_3) << ":"
         << item->GetEnchantmentId(BONUS_ENCHANTMENT_SLOT) << ":"
         << item->GetItemRandomPropertyId() << ":" << item->GetItemSuffixFactor() << ":"
-        << (uint32)0 << "|h[" << ItemNameWithLocale(player, itemTemplate, item->GetItemRandomPropertyId()) << "]|h|r";
+        << (uint32)item->GetOwner()->GetLevel() << "|h[" << ItemNameWithLocale(player, itemTemplate, item->GetItemRandomPropertyId()) << "]|h|r";
 
     return oss.str();
 }

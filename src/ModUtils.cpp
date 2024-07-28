@@ -155,7 +155,7 @@ void ModUtils::SellItem(Player* player, Item* item, const ItemTemplate* itemTemp
     totalCount += count;
 
     ChatHandler chatHandler(player->GetSession());
-    chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ItemLink(player, item).c_str(), CopperToMoneyStr(money, false).c_str());
+    chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ItemLink(player, item), CopperToMoneyStr(money, false));
 }
 
 bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
@@ -262,7 +262,7 @@ bool ModUtils::SellItemsOfQuality(Player* player, uint32 quality)
     ChatHandler chatHandler(player->GetSession());
 
     if (soldItems > 0)
-        chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ALL_ITEMS, soldItems, CopperToMoneyStr(totalSellPrice, false).c_str());
+        chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ALL_ITEMS, soldItems, CopperToMoneyStr(totalSellPrice, false));
     else
         chatHandler.SendSysMessage(LANG_MOD_SI_NOTHING_NO_SELL);
 
@@ -434,7 +434,7 @@ bool ModUtils::SellItem(Player* player, Creature* creature, Item* item) const
     player->ModifyMoney(money);
 
     ChatHandler chatHandler(player->GetSession());
-    chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ItemLink(player, item).c_str(), CopperToMoneyStr(money, false).c_str());
+    chatHandler.PSendSysMessage(LANG_MOD_SI_SOLD_ITEM, count, ItemLink(player, item), CopperToMoneyStr(money, false));
 
     return true;
 }

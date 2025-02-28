@@ -9,7 +9,7 @@ public:
     {
     }
 
-    void OnAfterConfigLoad(bool /*reload*/)
+    void OnAfterConfigLoad(bool /*reload*/) override
     {
         sModUtils->SetSearchBank(sConfigMgr->GetOption<bool>("SellItems.SearchBank", false));
         sModUtils->SetSearchBankBags(sConfigMgr->GetOption<bool>("SellItems.SearchBankBags", false));
